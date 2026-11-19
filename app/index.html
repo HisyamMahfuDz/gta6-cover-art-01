@@ -1,0 +1,71 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neon Coast Cover Studio — GTA-style cover art maker</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="app">
+  <section class="controls">
+    <h1>Neon Coast <span>Cover Studio</span></h1>
+    <p class="tagline">Your photo + a caption, made into multi-panel GTA-style cover art. Offline — photos never leave your machine.</p>
+
+    <fieldset>
+      <legend>1 · Photos</legend>
+      <label>Photo 1 <input id="photo0" type="file" accept="image/*"></label>
+      <label>Photo 2 <input id="photo1" type="file" accept="image/*"></label>
+      <div class="row">
+        <button id="samples" type="button">Load sample photos</button>
+        <button id="swap" type="button">Swap photos</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>2 · Layout</legend>
+      <div id="layouts" class="pickgrid"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>3 · Grade</legend>
+      <div id="grades" class="pickgrid"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>4 · Caption</legend>
+      <label>Title <input id="title" type="text" maxlength="32" value="Neon Shore"></label>
+      <label>Subtitle <input id="subtitle" type="text" maxlength="48" value="golden days, neon nights"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>5 · Crop panel photo <span id="slotLabel">Panel photo 1</span></legend>
+      <div class="row">
+        <button id="slotPrev" type="button">◀ Photo</button>
+        <button id="slotNext" type="button">Photo ▶</button>
+      </div>
+      <label>Zoom <span id="zoomVal">100%</span> <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1"></label>
+      <label>Move X <span id="oxVal">0</span> <input id="ox" type="range" min="-0.5" max="0.5" step="0.02" value="0"></label>
+      <label>Move Y <span id="oyVal">0</span> <input id="oy" type="range" min="-0.5" max="0.5" step="0.02" value="0"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>6 · Export PNG</legend>
+      <div id="sizes" class="pickgrid"></div>
+      <div class="row">
+        <button id="export" type="button" class="primary">Export PNG</button>
+        <button id="exportAll" type="button">Export all 3 sizes</button>
+      </div>
+    </fieldset>
+
+    <p id="status" role="status">Load a photo to begin.</p>
+    <p class="fine">Original art and lettering (Anton + Pacifico, SIL OFL). No Rockstar logo, artwork or fonts.</p>
+  </section>
+  <section class="preview">
+    <canvas id="cover" width="640" height="640" aria-label="The cover preview"></canvas>
+  </section>
+</main>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
