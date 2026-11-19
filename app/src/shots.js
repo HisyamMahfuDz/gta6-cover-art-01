@@ -1,37 +1,36 @@
 // SPDX-License-Identifier: MIT
-// Fixed scenes for screenshots: ?shot=editor shows the page with the sample
-// photos loaded; ?shot=cover shows one exported cover alone, drawn by the app
-// at the requested post size. window.__shotReady is set once painted.
-import { drawCover } from './cover.js';
+// Fixed scenes for screenshots: ?shot=editor shows the page with a sample
+// scene loaded; ?shot=cover shows the cover alone. The query picks the
+// samples and the cover settings:
+//   photo, photo2 — sample names (samples/<name>.jpg), default pier/boulevard
+//   title, subtitle — the lettering
+//   layout, grade — the cover's layout and grade
+//   cw, ch — the canvas pixel size (a portrait cover uses 1024x1280)
+// window.__shotReady is set once the scene has painted.
 
-export async function runShot(shot, query, api) {
-  const { state } = api;
-  const canvas = document.getElementById('cover');
-  await api.loadSamples();
-  state.title = query.get('title') ?? 'Neon Shore';
-  state.subtitle = query.get('subtitle') ?? 'golden days, neon nights';
-  state.layout = query.get('layout') ?? 'hero-three';
-  state.grade = query.get('grade') ?? 'sunset';
-  if (query.get('zoom')) state.adjust[0].zoom = Number(query.get('zoom'));
-  api.refreshControls();
-
-  if (shot === 'cover') {
-    document.body.classList.add('shot-cover');
-    const [w, h] = (query.get('size') ?? '1920x1080').split('x').map(Number);
-    canvas.width = w;
-    canvas.height = h;
-    drawCover(canvas, state);
-  } else {
-    // Editor scenes keep the normal preview canvas.
-    api.redraw();
+export async function runShot(shot, query, hooks) {
+  if (shot === 'cover') document.body.classList.add('shot-cover');
+  const photo = query.get('photo') ?? 'pier';
+  const photo2 = query.get('photo2') ?? (photo === 'pier' ? 'boulevard' : 'pier');
+  const title = query.get('title') ?? 'Sunset Heist';
+  const subtitle = query.get('subtitle') ?? '';
+  const layout = query.get('layout') ?? 'hero-three';
+  const grade = query.get('grade') ?? 'vice-sunset';
+  const cw = Number(query.get('cw') ?? 0);
+  const ch = Number(query.get('ch') ?? 0);
+  if (cw > 0 && ch > 0) {
+    hooks.canvas.width = cw;
+    hooks.canvas.height = ch;
   }
-  await document.fonts.ready;
-  if (shot === 'cover') {
-    // Redraw after the font swap, so the title uses Anton, not a fallback.
-    // (Do not call api.redraw() here: it would shrink the canvas to preview size.)
-    drawCover(canvas, state);
-  } else {
-    api.redraw();
-  }
-  requestAnimationFrame(() => requestAnimationFrame(() => { window.__shotReady = true; }));
+  const [a, b] = await Promise.all([
+    hooks.loadImage(`samples/${photo}.jpg`),
+    hooks.loadImage(`samples/${photo2}.jpg`),
+  ]);
+  hooks.setState({ layout, grade, title, subtitle, photos: { a, b } });
+  await hooks.ensureFonts();
+  hooks.redraw();
+  await new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
+  window.__shotReady = true;
 }
